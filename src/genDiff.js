@@ -19,7 +19,7 @@ export default (obj1, obj2) => {
     }
     const sorted = _.sortBy(diff, ([, [key, ]]) => key);
     let result = sorted.reduce((acc, [sign, [key, value]]) => {
-        acc += `\n ${sign} ${key}: ${value}`;
+        acc += `\n${sign} ${key}: ${value}`;
         return acc;
     }, '{');
     result += '\n}';

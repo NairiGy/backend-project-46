@@ -6,7 +6,7 @@ const parseFromJSON = (raw) => JSON.parse(raw);
 
 export default (filepath) => {
     const absolutePath = path.resolve(process.cwd(), filepath);
-    const raw = fs.readFileSync(filepath, 'utf8');
+    const raw = fs.readFileSync(absolutePath, 'utf8');
     const ext = _.last(filepath.split('.'));
     return parseFromJSON(raw);
 }
