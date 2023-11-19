@@ -14,7 +14,7 @@ const makeObj = (key, type, value) => ({
 });
 
 const genDiff = (obj1, obj2) => {
-  const tree = Object.entries(obj1)
+  const items = Object.entries(obj1)
     .map(([key, value]) => {
       // Если свойство есть в обоих объектах
       if (_.has(obj2, key)) {
@@ -45,7 +45,7 @@ const genDiff = (obj1, obj2) => {
       return null;
     })
     .filter((item) => !_.isNull(item));
-  const all = tree.concat(newItems);
+  const all = items.concat(newItems);
   const sorted = _.sortBy(all, (item) => item.key);
   return sorted;
 };
