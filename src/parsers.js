@@ -10,7 +10,6 @@ const parsers = {
 };
 
 export default (filepath) => {
-  console.log(filepath);
   const absolutePath = path.resolve(process.cwd(), filepath);
   console.log(absolutePath);
   const raw = fs.readFileSync(absolutePath, 'utf8');
