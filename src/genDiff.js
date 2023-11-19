@@ -5,6 +5,7 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
 import formatters from './formatters/index.js';
+import parse from './parsers.js';
 
 const genDiff = (obj1, obj2) => {
   const tree = {};
@@ -63,4 +64,8 @@ const genDiff = (obj1, obj2) => {
   return sorted;
 };
 
-export default (obj1, obj2, format = 'stylish') => formatters[format](genDiff(obj1, obj2));
+export default (filepath1, filepath2, format = 'stylish') => {
+  const obj1 = parse(filepath1);
+  const obj2 = parse(filepath2);
+  return formatters[format](genDiff(obj1, obj2));
+};

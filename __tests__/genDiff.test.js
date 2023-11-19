@@ -3,7 +3,6 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import * as fs from 'fs';
 import genDiff from '../src/genDiff.js';
-import parse from '../src/parsers.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +27,5 @@ test.each([
   const file1Path = getFixturePath(file1);
   const file2Path = getFixturePath(file2);
   const diff = fs.readFileSync(diffFilePath, 'utf-8');
-  const data1 = parse(file1Path);
-  const data2 = parse(file2Path);
-  expect(genDiff(data1, data2, format)).toBe(diff);
+  expect(genDiff(file1Path, file2Path, format)).toBe(diff);
 });
