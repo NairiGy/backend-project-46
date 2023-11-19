@@ -1,18 +1,6 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
 
-const formLine = (ident, key, value, changeSymbol) => `${ident}${changeSymbol} ${key}: ${value}`;
-
-const typeToLine = {
-  unchanged: (ident, key, value) => formLine(ident, key, value, ' '),
-  changed: (ident, key, value, newValue) => [
-    formLine(ident, key, value, '-'),
-    formLine(ident, key, newValue, '+'),
-  ].join('\n'),
-  deleted: (ident, key, value) => formLine(ident, key, value, '-'),
-  new: (ident, key, value) => formLine(ident, key, value, '+'),
-};
-
 export default (tree) => {
   const iter = (currentValue, depth, replacer = ' ', spacesCount = 4) => {
     const indentSize = depth * spacesCount - 2;
@@ -22,19 +10,22 @@ export default (tree) => {
       return `${currentValue}`;
     }
     const lines = Object.entries(currentValue)
-      .map((key, body) => {
-        if (body.newValue) {
-          const { type, value, newValue } = body;
-          console.log(type);
-          const valueIter = iter(value, depth + 1);
-          if (newValue) {
-            const newValueIter = iter(newValue, depth + 1);
-            return typeToLine[type](currentIndent, key, valueIter, newValueIter);
-          }
-          return typeToLine[type](currentIndent, key, valueIter);
+      .map(([key, body]) => {
+        switch (body.type) {
+          case 'unchanged':
+            return `${currentIndent}  ${key}: ${iter(body.value, depth + 1)}`;
+          case 'changed':
+            return [
+              `${currentIndent}- ${key}: ${iter(body.value, depth + 1)}`,
+              `${currentIndent}+ ${key}: ${iter(body.newValue, depth + 1)}`,
+            ].join('\n');
+          case 'deleted':
+            return `${currentIndent}- ${key}: ${iter(body.value, depth + 1)}`;
+          case 'new':
+            return `${currentIndent}+ ${key}: ${iter(body.value, depth + 1)}`;
+          default:
+            return `${currentIndent}  ${key}: ${iter(body, depth + 1)}`;
         }
-        const notAnObject = body;
-        return typeToLine.unchanged(currentIndent, key, iter(notAnObject, depth + 1));
       });
 
     return [

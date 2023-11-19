@@ -8,59 +8,55 @@ import formatters from './formatters/index.js';
 import parse from './parsers.js';
 
 const genDiff = (obj1, obj2) => {
-  const tree = {};
-  Object.entries(obj1)
+  const tree = Object.entries(obj1)
     .map(([key, value]) => {
       // Если свойство есть в обоих объектах
       if (_.has(obj2, key)) {
         // Если свойство в обоих объектах - объект
         if (_.isObject(value) && _.isObject(obj2[key])) {
-          tree[key] = {
-            value: genDiff(value, obj2[key]),
-            type: 'unchanged',
+          return {
+            key,
+            children: genDiff(value, obj2[key]),
+            type: 'nested',
           };
-          return;
         }
         // Если значения совпадают
         if (value === obj2[key]) {
-          tree[key] = {
+          return {
+            key,
             value,
             type: 'unchanged',
           };
-          return;
         }
         // Если значения не совпадают
-        tree[key] = {
-          value,
-          newValue: obj2[key],
+        return {
+          key,
+          value: [value, obj2[key]],
           type: 'changed',
         };
-        return;
       }
       // Если свойство удалили
-      tree[key] = {
+      return {
+        key,
         value,
         type: 'deleted',
       };
     });
-  Object.entries(obj2)
+  const newItems = Object.entries(obj2)
     .map(([key, value]) => {
       // Если свойство новое
       if (!_.has(obj1, key)) {
-        tree[key] = {
+        return {
+          key,
           value,
           type: 'new',
         };
       }
-    });
-  const sorted = Object.keys(tree).sort()
-    .reduce(
-      (obj, key) => {
-        obj[key] = tree[key];
-        return obj;
-      },
-      {},
-    );
+      return null;
+    })
+    .filter((item) => !_.isNull(item));
+  const all = tree.concat(newItems);
+  const sorted = _.sortBy(all, (item) => item.key);
   return sorted;
 };
 

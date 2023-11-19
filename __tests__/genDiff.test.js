@@ -19,7 +19,7 @@ test.each([
   ['json', 'json'],
   ['json', 'yaml'],
   ['json', 'yml'],
-])('.gen %p diff for %p', (format, ext) => {
+])('Generate %p diff for %p', (format, ext) => {
   const diffFile = `diff ${format}`;
   const file1 = `file1.${ext}`;
   const file2 = `file2.${ext}`;
