@@ -1,7 +1,28 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
 
-const stylish = (arr, depth = 1, replacer = ' ', spacesCount = 4) => {
+const replacer = ' ';
+const spacesCount = 4;
+
+const formatValue = (value, currentDepth) => {
+  if (!_.isObject(value)) {
+    return value;
+  }
+  const nestedIndentSize = currentDepth * spacesCount - 2;
+  const nestedIndent = replacer.repeat(nestedIndentSize);
+  const nestedBracketIndent = replacer.repeat(nestedIndentSize - 2);
+  const lines = Object
+    .entries(value)
+    .map(([nestedKey, nestedValue]) => `${nestedIndent}  ${nestedKey}: ${formatValue(nestedValue, currentDepth + 1)}`);
+
+  return [
+    '{',
+    ...lines,
+    `${nestedBracketIndent}}`,
+  ].join('\n');
+};
+
+const stylish = (arr, depth = 1) => {
   const indentSize = depth * spacesCount - 2;
   const currentIndent = replacer.repeat(indentSize);
   const bracketIndent = replacer.repeat(indentSize - 2);
@@ -14,24 +35,6 @@ const stylish = (arr, depth = 1, replacer = ' ', spacesCount = 4) => {
   };
 
   const makeLine = (key, value, char) => `${currentIndent}${char} ${key}: ${value}`;
-
-  const formatValue = (value, currentDepth) => {
-    if (!_.isObject(value)) {
-      return value;
-    }
-    const nestedIndentSize = currentDepth * spacesCount - 2;
-    const nestedIndent = replacer.repeat(nestedIndentSize);
-    const nestedBracketIndent = replacer.repeat(nestedIndentSize - 2);
-    const lines = Object
-      .entries(value)
-      .map(([nestedKey, nestedValue]) => `${nestedIndent}  ${nestedKey}: ${formatValue(nestedValue, currentDepth + 1)}`);
-
-    return [
-      '{',
-      ...lines,
-      `${nestedBracketIndent}}`,
-    ].join('\n');
-  };
 
   const lineFromType = {
     nested: (key, children) => makeLine(key, stylish(children, depth + 1), symbolMap.nested),

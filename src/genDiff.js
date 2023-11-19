@@ -7,6 +7,12 @@ import _ from 'lodash';
 import formatters from './formatters/index.js';
 import parse from './parsers.js';
 
+const makeObj = (key, type, value) => ({
+  key,
+  value,
+  type,
+});
+
 const genDiff = (obj1, obj2) => {
   const tree = Object.entries(obj1)
     .map(([key, value]) => {
@@ -22,35 +28,19 @@ const genDiff = (obj1, obj2) => {
         }
         // Если значения совпадают
         if (value === obj2[key]) {
-          return {
-            key,
-            value,
-            type: 'unchanged',
-          };
+          return makeObj(key, 'unchanged', value);
         }
         // Если значения не совпадают
-        return {
-          key,
-          value: [value, obj2[key]],
-          type: 'changed',
-        };
+        return makeObj(key, 'changed', [value, obj2[key]]);
       }
       // Если свойство удалили
-      return {
-        key,
-        value,
-        type: 'deleted',
-      };
+      return makeObj(key, 'deleted', value);
     });
   const newItems = Object.entries(obj2)
     .map(([key, value]) => {
       // Если свойство новое
       if (!_.has(obj1, key)) {
-        return {
-          key,
-          value,
-          type: 'new',
-        };
+        return makeObj(key, 'new', value);
       }
       return null;
     })
