@@ -1,57 +1,25 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable default-case */
-/* eslint-disable no-case-declarations */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-param-reassign */
+import * as fs from 'fs';
+import path from 'path';
 import _ from 'lodash';
 import formatters from './formatters/index.js';
-import parse from './parsers.js';
+import parse from './parsers/index.js';
+import buildTree from './treeBuider.js';
 
-const makeObj = (key, type, value) => ({
-  key,
-  value,
-  type,
-});
+const getExtension = (filepath) => _.last(filepath.split('.'));
+const getRawData = (filepath) => {
+  const absolutePath = path.resolve(process.cwd(), filepath);
+  const raw = fs.readFileSync(absolutePath, 'utf8');
 
-const genDiff = (obj1, obj2) => {
-  const items = Object.entries(obj1)
-    .map(([key, value]) => {
-      // Если свойство есть в обоих объектах
-      if (_.has(obj2, key)) {
-        // Если свойство в обоих объектах - объект
-        if (_.isObject(value) && _.isObject(obj2[key])) {
-          return {
-            key,
-            children: genDiff(value, obj2[key]),
-            type: 'nested',
-          };
-        }
-        // Если значения совпадают
-        if (value === obj2[key]) {
-          return makeObj(key, 'unchanged', value);
-        }
-        // Если значения не совпадают
-        return makeObj(key, 'changed', [value, obj2[key]]);
-      }
-      // Если свойство удалили
-      return makeObj(key, 'deleted', value);
-    });
-  const newItems = Object.entries(obj2)
-    .map(([key, value]) => {
-      // Если свойство новое
-      if (!_.has(obj1, key)) {
-        return makeObj(key, 'new', value);
-      }
-      return null;
-    })
-    .filter((item) => !_.isNull(item));
-  const all = items.concat(newItems);
-  const sorted = _.sortBy(all, (item) => item.key);
-  return sorted;
+  return raw;
 };
 
 export default (filepath1, filepath2, format = 'stylish') => {
-  const obj1 = parse(filepath1);
-  const obj2 = parse(filepath2);
-  return formatters[format](genDiff(obj1, obj2));
+  const rawData1 = getRawData(filepath1);
+  const rawData2 = getRawData(filepath2);
+  const ext1 = getExtension(filepath1);
+  const ext2 = getExtension(filepath2);
+  const obj1 = parse(rawData1, ext1);
+  const obj2 = parse(rawData2, ext2);
+
+  return formatters[format](buildTree(obj1, obj2));
 };

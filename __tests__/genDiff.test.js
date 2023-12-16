@@ -1,4 +1,3 @@
-// import { test, expect } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import * as fs from 'fs';
@@ -20,7 +19,7 @@ test.each([
   ['json', 'yaml'],
   ['json', 'yml'],
 ])('Generate %p diff for %p', (format, ext) => {
-  const diffFile = `diff ${format}`;
+  const diffFile = `diff ${format}.txt`;
   const file1 = `file1.${ext}`;
   const file2 = `file2.${ext}`;
   const diffFilePath = getFixturePath(diffFile);

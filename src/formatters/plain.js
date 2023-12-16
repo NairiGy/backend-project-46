@@ -1,9 +1,8 @@
-/* eslint-disable no-param-reassign */
 import _ from 'lodash';
 
-const formatValue = (value) => {
+const stringify = (value) => {
   if (_.isArray(value)) {
-    return value.map((item) => formatValue(item));
+    return value.map((item) => stringify(item));
   }
   if (_.isObject(value)) {
     return '[complex value]';
@@ -14,24 +13,20 @@ const formatValue = (value) => {
   return value;
 };
 
-const lineFromType = {
-  new: (path, value) => `Property ${path} was added with value: ${value}`,
-  deleted: (path) => `Property ${path} was removed`,
-  unchanged: () => null,
-  changed: (path, value) => `Property ${path} was updated. From ${value[0]} to ${value[1]}`,
+const mapping = {
+  added: (path, value) => `Property ${stringify(path)} was added with value: ${stringify(value)}`,
+  deleted: (path) => `Property ${stringify(path)} was removed`,
+  unchanged: () => [],
+  changed: (path, value) => `Property ${stringify(path)} was updated. From ${stringify(value[0])} to ${stringify(value[1])}`,
+  nested: (path, value, children) => {
+    const lines = children.map((child) => mapping[child.type](`${path}.${child.key}`, child.value, child.children));
+    return _.flatMap(lines).join('\n');
+  },
 };
 
-const plain = (arr, path = '') => {
-  const lines = arr.map((node) => {
-    if (node.type === 'nested') {
-      return plain(node.children, `${path}${node.key}.`);
-    }
-    const value = formatValue(node.value);
-    const fullPath = formatValue(`${path}${node.key}`);
-    return lineFromType[node.type](fullPath, value);
-  });
-  const noNullLines = lines.filter((line) => line !== null);
-  return noNullLines.join('\n');
+const plain = (arr) => {
+  const lines = arr.map((node) => mapping[node.type](node.key, node.value, node.children));
+  return _.flatMap(lines).join('\n');
 };
 
 export default plain;
