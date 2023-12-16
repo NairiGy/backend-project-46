@@ -47,7 +47,6 @@ const buildTree = (obj1, obj2) => {
     };
   });
 
-  console.log(items);
   return items;
 };
 
