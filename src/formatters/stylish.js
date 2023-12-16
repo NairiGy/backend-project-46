@@ -40,7 +40,10 @@ const renderTree = (arr) => {
         mapping.added(key, value[1]),
       ].join('\n'),
     };
-    const lines = ast.map((node) => mapping[node.type](node.key, node.children ?? node.value, depth));
+    const lines = ast.map(({
+      type, key, children, value,
+    }) => mapping[type](key, children ?? value, depth));
+
     return [
       '{',
       ...lines,
