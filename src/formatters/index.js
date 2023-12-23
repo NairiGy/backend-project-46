@@ -8,4 +8,10 @@ const formatters = {
   json,
 };
 
-export default formatters;
+export default (formatName) => {
+  try {
+    return formatters[formatName];
+  } catch (e) {
+    throw new Error(`Invalid format name ${formatName}`);
+  }
+};

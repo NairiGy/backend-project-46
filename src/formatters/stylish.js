@@ -1,56 +1,42 @@
 import _ from 'lodash';
 
-const symbolMap = {
-  added: '+',
-  deleted: '-',
-  unchanged: ' ',
-  nested: ' ',
-};
-
 const indent = (depth, offset = 2, spacesCount = 4, replacer = ' ') => replacer.repeat(depth * spacesCount - offset);
 
-const stringify = (value, currentDepth) => {
+const stringify = (value, currentDepth, unchanged) => {
   if (!_.isObject(value)) {
     return String(value);
   }
-  const nestedIndent = indent(currentDepth);
-  const nestedBracketIndent = indent(currentDepth, 4);
+
   const lines = Object
     .entries(value)
-    .map(([nestedKey, nestedValue]) => `${nestedIndent}  ${nestedKey}: ${stringify(nestedValue, currentDepth + 1)}`);
+    .map(([k, v]) => unchanged({ key: k, value: v }, currentDepth));
 
   return [
     '{',
     ...lines,
-    `${nestedBracketIndent}}`,
+    `${indent(currentDepth, 4)}}`,
   ].join('\n');
 };
 
-const renderTree = (arr) => {
-  const iter = (ast, depth) => {
-    const currentIndent = indent(depth);
-    const bracketIndent = indent(depth, 4);
-    const mapping = {
-      nested: (key, children) => `${currentIndent}${symbolMap.nested} ${key}: ${iter(children, depth + 1)}`,
-      added: (key, value) => `${currentIndent}${symbolMap.added} ${key}: ${stringify(value, depth + 1)}`,
-      deleted: (key, value) => `${currentIndent}${symbolMap.deleted} ${key}: ${stringify(value, depth + 1)}`,
-      unchanged: (key, value) => `${currentIndent}${symbolMap.unchanged} ${key}: ${stringify(value, depth + 1)}`,
-      changed: (key, value) => [
-        mapping.deleted(key, value[0]),
-        mapping.added(key, value[1]),
-      ].join('\n'),
-    };
-    const lines = ast.map(({
-      type, key, children, value,
-    }) => mapping[type](key, children ?? value, depth));
-
-    return [
-      '{',
-      ...lines,
-      `${bracketIndent}}`,
-    ].join('\n');
-  };
-  return iter(arr, 1);
+const mapping = {
+  root: ({ children }, depth, iter) => [
+    '{',
+    children.flatMap((node) => iter(node, depth + 1, iter)).join('\n'),
+    '}'],
+  nested: ({ key, children }, depth, iter) => [
+    `${indent(depth)}  ${key}: {`,
+    `${children.flatMap((node) => iter(node, depth + 1, iter)).join('\n')}`,
+    `${indent(depth, 0)}}`],
+  added: ({ key, value }, depth) => `${indent(depth)}+ ${key}: ${stringify(value, depth + 1, mapping.unchanged)}`,
+  deleted: ({ key, value }, depth) => `${indent(depth)}- ${key}: ${stringify(value, depth + 1, mapping.unchanged)}`,
+  unchanged: ({ key, value }, depth) => `${indent(depth)}  ${key}: ${stringify(value, depth + 1, mapping.unchanged)}`,
+  changed: ({ key, value }, depth) => [
+    mapping.deleted({ key, value: value[0] }, depth),
+    mapping.added({ key, value: value[1] }, depth),
+  ].join('\n'),
 };
-
-export default renderTree;
+const renderStylish = (ast) => {
+  const iter = (node, currentDepth) => mapping[node.type](node, currentDepth, iter);
+  return iter(ast, 0).join('\n');
+};
+export default renderStylish;

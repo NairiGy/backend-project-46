@@ -28,3 +28,21 @@ test.each([
   const diff = fs.readFileSync(diffFilePath, 'utf-8');
   expect(genDiff(file1Path, file2Path, format)).toBe(diff);
 });
+
+test.each([
+  'yml',
+  'json',
+])('Generate %p diff for %p', (ext) => {
+  const formats = ['stylish', 'plain', 'json'];
+  formats.forEach((format) => {
+    const diffFile = `diff ${format}.txt`;
+    const file1 = `file1.${ext}`;
+    const file2 = `file2.${ext}`;
+    const diffFilePath = getFixturePath(diffFile);
+    const file1Path = getFixturePath(file1);
+    const file2Path = getFixturePath(file2);
+    const diff = fs.readFileSync(diffFilePath, 'utf-8');
+    expect(genDiff(file1Path, file2Path, format)).toBe(diff);
+    expect(() => JSON.parse(genDiff(file1Path, file2Path, 'json'))).not.toThrow();
+  });
+});

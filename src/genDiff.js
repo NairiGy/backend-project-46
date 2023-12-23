@@ -1,25 +1,29 @@
 import * as fs from 'fs';
 import path from 'path';
-import _ from 'lodash';
 import formatters from './formatters/index.js';
-import parse from './parsers/index.js';
+import parse from './parsers.js';
 import buildTree from './treeBuider.js';
 
-const getExtension = (filepath) => _.last(filepath.split('.'));
-const getRawData = (filepath) => {
-  const absolutePath = path.resolve(process.cwd(), filepath);
-  const raw = fs.readFileSync(absolutePath, 'utf8');
+const extractExtname = (filepath) => path.extname(filepath).slice(1);
+const buildFullPath = (filepath) => path.resolve(process.cwd(), filepath);
+const getData = (fullPath) => {
+  const data = fs.readFileSync(fullPath, 'utf8');
 
-  return raw;
+  return data;
 };
 
-export default (filepath1, filepath2, format = 'stylish') => {
-  const rawData1 = getRawData(filepath1);
-  const rawData2 = getRawData(filepath2);
-  const ext1 = getExtension(filepath1);
-  const ext2 = getExtension(filepath2);
-  const obj1 = parse(rawData1, ext1);
-  const obj2 = parse(rawData2, ext2);
+const format = (formatName, internalTree) => formatters(formatName)(internalTree);
 
-  return formatters[format](buildTree(obj1, obj2));
+export default (filepath1, filepath2, formatName = 'stylish') => {
+  const fullPath1 = buildFullPath(filepath1);
+  const fullPath2 = buildFullPath(filepath2);
+  const data1 = getData(fullPath1);
+  const data2 = getData(fullPath2);
+  const ext1 = extractExtname(filepath1);
+  const ext2 = extractExtname(filepath2);
+  const obj1 = parse(data1, ext1);
+  const obj2 = parse(data2, ext2);
+  const internalTree = buildTree(obj1, obj2);
+
+  return format(formatName, internalTree);
 };

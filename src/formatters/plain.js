@@ -10,23 +10,23 @@ const stringify = (value) => {
   if (typeof value === 'string') {
     return `'${value}'`;
   }
-  return value;
+  return String(value);
 };
+
+const formFullPath = (parts) => stringify(parts.join('.'));
 
 const mapping = {
-  added: (path, value) => `Property ${stringify(path)} was added with value: ${stringify(value)}`,
-  deleted: (path) => `Property ${stringify(path)} was removed`,
+  root: ({ children }, path, iter) => children.flatMap((node) => iter(node, path, iter)),
+  added: ({ value, key }, path) => `Property ${formFullPath([...path, key])} was added with value: ${stringify(value)}`,
+  deleted: ({ key }, path) => `Property ${formFullPath([...path, key])} was removed`,
   unchanged: () => [],
-  changed: (path, value) => `Property ${stringify(path)} was updated. From ${stringify(value[0])} to ${stringify(value[1])}`,
-  nested: (path, value, children) => {
-    const lines = children.map((child) => mapping[child.type](`${path}.${child.key}`, child.value, child.children));
-    return _.flatMap(lines).join('\n');
-  },
+  changed: ({ value, key }, path) => `Property ${formFullPath([...path, key])} was updated. From ${stringify(value[0])} to ${stringify(value[1])}`,
+  nested: ({ key, children }, path, iter) => children.flatMap((node) => iter(node, [...path, key])),
+
 };
 
-const plain = (arr) => {
-  const lines = arr.map((node) => mapping[node.type](node.key, node.value, node.children));
-  return _.flatMap(lines).join('\n');
+const renderPlain = (ast) => {
+  const iter = (node, currentPath) => mapping[node.type](node, currentPath, iter);
+  return iter(ast, []).join('\n');
 };
-
-export default plain;
+export default renderPlain;
