@@ -22,11 +22,13 @@ const mapping = {
   root: ({ children }, depth, iter) => [
     '{',
     children.flatMap((node) => iter(node, depth + 1, iter)).join('\n'),
-    '}'],
+    '}',
+  ],
   nested: ({ key, children }, depth, iter) => [
     `${indent(depth)}  ${key}: {`,
     `${children.flatMap((node) => iter(node, depth + 1, iter)).join('\n')}`,
-    `${indent(depth, 0)}}`],
+    `${indent(depth, 0)}}`,
+  ],
   added: ({ key, value }, depth) => `${indent(depth)}+ ${key}: ${stringify(value, depth + 1, mapping.unchanged)}`,
   deleted: ({ key, value }, depth) => `${indent(depth)}- ${key}: ${stringify(value, depth + 1, mapping.unchanged)}`,
   unchanged: ({ key, value }, depth) => `${indent(depth)}  ${key}: ${stringify(value, depth + 1, mapping.unchanged)}`,

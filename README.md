@@ -2,6 +2,7 @@
 [![gendiff-check](https://github.com/NairiGy/backend-project-46/actions/workflows/gendiff-check.yml/badge.svg)](https://github.com/NairiGy/backend-project-46/actions/workflows/gendiff-check.yml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/15a61948ce22767b567b/maintainability)](https://codeclimate.com/github/NairiGy/backend-project-46/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/15a61948ce22767b567b/test_coverage)](https://codeclimate.com/github/NairiGy/backend-project-46/test_coverage)
+
 [Ссылка с примером](https://asciinema.org/a/q5TA2ci0SRLpr0BMsaToybOxq)
 
 
@@ -16,5 +17,5 @@
 
 ### Установка
 
-        git clone git@github.com:NairiGy/backend-project-44.git
+        git clone git@github.com:NairiGy/backend-project-46.git
         make install
