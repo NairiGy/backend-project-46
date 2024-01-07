@@ -6,11 +6,7 @@ import buildTree from './treeBuider.js';
 
 const extractExtname = (filepath) => path.extname(filepath).slice(1);
 const buildFullPath = (filepath) => path.resolve(process.cwd(), filepath);
-const getData = (fullPath) => {
-  const data = fs.readFileSync(fullPath, 'utf8');
-
-  return data;
-};
+const getData = (fullPath) => fs.readFileSync(fullPath, 'utf8');
 
 const format = (formatName, internalTree) => formatters(formatName)(internalTree);
 
